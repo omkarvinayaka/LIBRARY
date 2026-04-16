@@ -48,51 +48,20 @@ function autoSyncSafe() {
 }
 
 let serverStateSyncTimer = null;
-let serverStateBootstrapped = false;
 
 function scheduleServerStateSync(delay = 700) {
-    const base = getServerApiBase();
-    if (!base) return;
+    if (!getServerApiBase()) return;
     if (document.readyState === 'loading') return;
-
-    const users = getUsers();
-    const books = getBooks();
-    const transactions = getTransactions();
-    const receipts = getReceipts();
-
-    // Prevent accidental empty overwrite before app data is ready
-    if (
-       
-        users.length === 0 &&
-        books.length === 0 &&
-        transactions.length === 0 &&
-        receipts.length === 0
-    ) {
-        console.warn('Skipped sync: local state not ready yet');
-        return;
-    }
-
     if (serverStateSyncTimer) window.clearTimeout(serverStateSyncTimer);
-
     serverStateSyncTimer = window.setTimeout(() => {
-        syncPortableLibraryState().catch((error) => {
-            console.warn('Portable state sync failed:', error);
-        });
+        syncPortableLibraryState().catch(() => {});
     }, delay);
 }
 
 async function syncPortableLibraryState() {
     const state = getPortableLibraryState();
     const result = await callServerJson('/api/library-state', { state });
-
-    if (result && result.ok) {
-        serverStateBootstrapped = true;
-        localStorage.setItem(STORAGE_KEYS.serverSyncAt, new Date().toISOString());
-        console.log('✅ Portable library state synced to DB');
-    } else {
-        console.warn('⚠ DB sync failed', result);
-    }
-
+    if (result.ok) localStorage.setItem(STORAGE_KEYS.serverSyncAt, new Date().toISOString());
     return result;
 }
 
@@ -408,7 +377,7 @@ function getFeedbackMonthKey(date = new Date()) {
 }
 
 function shouldShowMonthlyFeedback(date = new Date()) {
-    return Number(date.getDate()) === 17;
+    return Number(date.getDate()) === 10;
 }
 
 function hasSubmittedFeedbackForMonth(userUid, monthKey = getFeedbackMonthKey()) {
@@ -545,7 +514,7 @@ function mountMonthlyFeedbackPrompt() {
                 <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:18px;" id="feedback-stars">${[1,2,3,4,5].map(star => `<button type="button" data-feedback-star="${star}" style="width:48px; height:48px; border:none; border-radius:16px; background:#f8fafc; cursor:pointer; font-size:1.5rem; box-shadow:var(--shadow-soft);">☆</button>`).join('')}</div>
                 <textarea id="feedback-content" class="form-control" rows="5" maxlength="280" placeholder="Write your feedback about the library, support, or digital resources (optional)" style="resize:none;"></textarea>
                 <div style="display:flex; justify-content:space-between; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center;">
-                    <small style="color:var(--text-muted);">Shown every month on the 17th.</small>
+                    <small style="color:var(--text-muted);">Shown every month on the 12th.</small>
                     <div style="display:flex; gap:10px; flex-wrap:wrap;">
                         <button type="button" class="btn btn-outline" id="feedback-skip-btn">Maybe Later</button>
                         <button type="button" class="btn btn-accent" id="feedback-submit-btn"><ion-icon name="send-outline"></ion-icon> Submit Feedback</button>
@@ -1572,16 +1541,14 @@ function loadJsPdfLibrary() {
 }
 
 function openReceiptPrintWindow(receipt = {}) {
-    
     const item = getReceiptDisplayRecord(receipt);
-
     const fileBase = String(item.receiptId || 'library_receipt').replace(/[^a-z0-9_-]+/gi, '_');
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
         showToast('Please allow popups for receipt print preview.', 'warning');
         return false;
     }
-   const receiptHtml = createReceiptPrintHtml(item);
+    const receiptHtml = createReceiptPrintHtml(item);
     printWindow.document.open();
     printWindow.document.write(`<!DOCTYPE html>
 <html lang="en">
@@ -1598,53 +1565,13 @@ function openReceiptPrintWindow(receipt = {}) {
   .receipt-print-btn.primary{background:linear-gradient(90deg,#102d69,#f07818);color:#fff}
   .receipt-print-btn.secondary{background:#fff;color:#102d69;border:1px solid #d5dfeb}
   .receipt-print-note{width:min(920px,100%);margin:0 auto 16px;background:rgba(255,255,255,.72);border:1px solid #d8e3ef;padding:10px 14px;border-radius:14px;color:#55657c;font-size:13px;line-height:1.5}
-   @page{
-    size:A4;
-    margin:12mm;
-  }
-
-  html, body, *{
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color-adjust: exact !important;
-  }
-
+  @page{size:A4;margin:12mm}
   @media print{
-    html, body{
-      background:#eef3fa !important;
-    }
-
-    body{
-      margin:0 !important;
-      background:linear-gradient(135deg,#edf3fa,#f7f1e8) !important;
-    }
-
-    .receipt-print-shell{
-      padding:0 !important;
-      min-height:auto !important;
-      background:transparent !important;
-    }
-
-    .receipt-print-actions,
-    .receipt-print-note{
-      display:none !important;
-    }
-
-    #receipt-pdf-root{
-      padding:0 !important;
-      background:linear-gradient(90deg,#eef3f9 0%,#eef3f9 35%,#f6f0e9 35%,#f6f0e9 100%) !important;
-      box-shadow:none !important;
-    }
-
-    #receipt-pdf-root *,
-    #receipt-pdf-root div,
-    #receipt-pdf-root span{
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      color-adjust: exact !important;
-    }
+    body{background:#fff}
+    .receipt-print-shell{padding:0;min-height:auto}
+    .receipt-print-actions,.receipt-print-note{display:none !important}
+    #receipt-pdf-root{padding:0 !important;background:#fff !important}
   }
-
   @media (max-width:680px){
     .receipt-print-shell{padding:14px 10px 22px}
     .receipt-print-actions{justify-content:center}
@@ -1672,16 +1599,12 @@ function openReceiptPrintWindow(receipt = {}) {
     return true;
 }
 
-
 function downloadReceiptPdf(receipt = {}) {
     const item = getReceiptDisplayRecord(receipt);
     if (String(item.verificationStatus || '').toUpperCase() !== 'RECEIVED') {
         showToast('Receipt download is available only after admin or librarian marks it as received.', 'warning');
         return;
     }
-   item.bookTitle = item.bookTitle || item.title;
-item.bookId = item.bookId || item.bookID;
-item.barcode = item.barcode || item.bookBarcode;
     openReceiptPrintWindow(item);
 }
 

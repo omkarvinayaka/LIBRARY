@@ -575,7 +575,7 @@ app.post('/api/run-reminder-sweep', async (req, res) => {
   }
 });
 
-app.post('/api/mongo-test', async (req, res) => {
+app.get('/api/mongo-test', async (req, res) => {
   if (!hasMongoConfig()) {
     return res.status(400).json({
       ok: false,

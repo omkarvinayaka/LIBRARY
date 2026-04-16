@@ -1542,6 +1542,9 @@ function loadJsPdfLibrary() {
 
 function openReceiptPrintWindow(receipt = {}) {
     const item = getReceiptDisplayRecord(receipt);
+   const bookTitle = receipt.bookTitle || receipt.title || receipt.book_name || '-';
+const bookId = receipt.bookId || receipt.bookID || receipt.book_id || '-';
+const barcode = receipt.barcode || receipt.bookBarcode || receipt.bar_code || '-';
     const fileBase = String(item.receiptId || 'library_receipt').replace(/[^a-z0-9_-]+/gi, '_');
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
@@ -1638,6 +1641,11 @@ function openReceiptPrintWindow(receipt = {}) {
     printWindow.document.close();
     return true;
 }
+<div style="margin-top:10px; font-size:14px;">
+  <div><strong>Book Title:</strong> ${bookTitle}</div>
+  <div><strong>Book ID:</strong> ${bookId}</div>
+  <div><strong>Barcode:</strong> ${barcode}</div>
+</div>
 
 function downloadReceiptPdf(receipt = {}) {
     const item = getReceiptDisplayRecord(receipt);
@@ -1645,6 +1653,9 @@ function downloadReceiptPdf(receipt = {}) {
         showToast('Receipt download is available only after admin or librarian marks it as received.', 'warning');
         return;
     }
+   item.bookTitle = item.bookTitle || item.title;
+item.bookId = item.bookId || item.bookID;
+item.barcode = item.barcode || item.bookBarcode;
     openReceiptPrintWindow(item);
 }
 

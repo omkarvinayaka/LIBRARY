@@ -48,20 +48,51 @@ function autoSyncSafe() {
 }
 
 let serverStateSyncTimer = null;
+let serverStateBootstrapped = false;
 
 function scheduleServerStateSync(delay = 700) {
-    if (!getServerApiBase()) return;
+    const base = getServerApiBase();
+    if (!base) return;
     if (document.readyState === 'loading') return;
+
+    const users = getUsers();
+    const books = getBooks();
+    const transactions = getTransactions();
+    const receipts = getReceipts();
+
+    // Prevent accidental empty overwrite before app data is ready
+    if (
+       
+        users.length === 0 &&
+        books.length === 0 &&
+        transactions.length === 0 &&
+        receipts.length === 0
+    ) {
+        console.warn('Skipped sync: local state not ready yet');
+        return;
+    }
+
     if (serverStateSyncTimer) window.clearTimeout(serverStateSyncTimer);
+
     serverStateSyncTimer = window.setTimeout(() => {
-        syncPortableLibraryState().catch(() => {});
+        syncPortableLibraryState().catch((error) => {
+            console.warn('Portable state sync failed:', error);
+        });
     }, delay);
 }
 
 async function syncPortableLibraryState() {
     const state = getPortableLibraryState();
     const result = await callServerJson('/api/library-state', { state });
-    if (result.ok) localStorage.setItem(STORAGE_KEYS.serverSyncAt, new Date().toISOString());
+
+    if (result && result.ok) {
+        serverStateBootstrapped = true;
+        localStorage.setItem(STORAGE_KEYS.serverSyncAt, new Date().toISOString());
+        console.log('✅ Portable library state synced to DB');
+    } else {
+        console.warn('⚠ DB sync failed', result);
+    }
+
     return result;
 }
 

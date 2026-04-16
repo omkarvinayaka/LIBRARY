@@ -1565,13 +1565,53 @@ function openReceiptPrintWindow(receipt = {}) {
   .receipt-print-btn.primary{background:linear-gradient(90deg,#102d69,#f07818);color:#fff}
   .receipt-print-btn.secondary{background:#fff;color:#102d69;border:1px solid #d5dfeb}
   .receipt-print-note{width:min(920px,100%);margin:0 auto 16px;background:rgba(255,255,255,.72);border:1px solid #d8e3ef;padding:10px 14px;border-radius:14px;color:#55657c;font-size:13px;line-height:1.5}
-  @page{size:A4;margin:12mm}
-  @media print{
-    body{background:#fff}
-    .receipt-print-shell{padding:0;min-height:auto}
-    .receipt-print-actions,.receipt-print-note{display:none !important}
-    #receipt-pdf-root{padding:0 !important;background:#fff !important}
+   @page{
+    size:A4;
+    margin:12mm;
   }
+
+  html, body, *{
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  @media print{
+    html, body{
+      background:#eef3fa !important;
+    }
+
+    body{
+      margin:0 !important;
+      background:linear-gradient(135deg,#edf3fa,#f7f1e8) !important;
+    }
+
+    .receipt-print-shell{
+      padding:0 !important;
+      min-height:auto !important;
+      background:transparent !important;
+    }
+
+    .receipt-print-actions,
+    .receipt-print-note{
+      display:none !important;
+    }
+
+    #receipt-pdf-root{
+      padding:0 !important;
+      background:linear-gradient(90deg,#eef3f9 0%,#eef3f9 35%,#f6f0e9 35%,#f6f0e9 100%) !important;
+      box-shadow:none !important;
+    }
+
+    #receipt-pdf-root *,
+    #receipt-pdf-root div,
+    #receipt-pdf-root span{
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+  }
+
   @media (max-width:680px){
     .receipt-print-shell{padding:14px 10px 22px}
     .receipt-print-actions{justify-content:center}

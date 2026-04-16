@@ -1543,9 +1543,7 @@ function loadJsPdfLibrary() {
 function openReceiptPrintWindow(receipt = {}) {
     
     const item = getReceiptDisplayRecord(receipt);
-   const bookTitle = receipt.bookTitle || receipt.title || receipt.book_name || '-';
-const bookId = receipt.bookId || receipt.bookID || receipt.book_id || '-';
-const barcode = receipt.barcode || receipt.bookBarcode || receipt.bar_code || '-';
+
     const fileBase = String(item.receiptId || 'library_receipt').replace(/[^a-z0-9_-]+/gi, '_');
     const printWindow = window.open('', '_blank');
     if (!printWindow) {

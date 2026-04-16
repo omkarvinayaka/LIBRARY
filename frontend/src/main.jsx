@@ -4,7 +4,11 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './assets/css/style.css';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'https://library-back-v33y.onrender.com';
+const API_BASE =
+  import.meta.env.VITE_API_BASE ||
+  (window.location.hostname === 'localhost'
+    ? 'http://localhost:4000'
+    : 'https://library-back-v33y.onrender.com');
 
 // Make backend URL always available to legacy pages
 window.VEMU_SERVER_API_BASE = API_BASE;

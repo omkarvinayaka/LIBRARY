@@ -1,4 +1,8 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'https://library-back-v33y.onrender.com';
+const API_BASE =
+  import.meta.env.VITE_API_BASE ||
+  (window.location.hostname === 'localhost'
+    ? 'http://localhost:4000'
+    : 'https://library-back-v33y.onrender.com');
 
 export async function fetchLibraryState() {
   const res = await fetch(`${API_BASE}/api/library-state`);

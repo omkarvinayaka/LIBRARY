@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
+const API_BASE = import.meta.env.VITE_API_BASE || 'https://library-backend-thwz.onrender.com';
 
 export async function fetchLibraryState() {
   const res = await fetch(`${API_BASE}/api/library-state`);

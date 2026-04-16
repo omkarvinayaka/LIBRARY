@@ -1541,11 +1541,7 @@ function loadJsPdfLibrary() {
 }
 
 function openReceiptPrintWindow(receipt = {}) {
-    const item = getReceiptDisplayRecord(receipt);
-    const bookTitle = item.bookTitle || receipt.bookTitle || receipt.title || receipt.book_name || '-';
-    const bookId = item.bookId || receipt.bookId || receipt.bookID || receipt.book_id || '-';
-    const barcode = item.barcodeNumber || receipt.barcodeNumber || receipt.barcode || receipt.bookBarcode || receipt.bar_code || '-';
-    const fileBase = String(item.receiptId || 'library_receipt').replace(/[^a-z0-9_-]+/gi, '_');
+    
     const item = getReceiptDisplayRecord(receipt);
    const bookTitle = receipt.bookTitle || receipt.title || receipt.book_name || '-';
 const bookId = receipt.bookId || receipt.bookID || receipt.book_id || '-';
@@ -1556,13 +1552,7 @@ const barcode = receipt.barcode || receipt.bookBarcode || receipt.bar_code || '-
         showToast('Please allow popups for receipt print preview.', 'warning');
         return false;
     }
-   const receiptHtml = createReceiptPrintHtml(item) + `
-  <div style="width:min(920px,100%); margin:14px auto 0; background:#ffffff; border:1px solid #d8e3ef; border-radius:16px; padding:14px 16px; color:#1f2f47; font-size:14px; line-height:1.7; box-shadow:0 8px 24px rgba(15,23,42,0.08);">
-    <div><strong>Book Title:</strong> ${bookTitle}</div>
-    <div><strong>Book ID:</strong> ${bookId}</div>
-    <div><strong>Barcode:</strong> ${barcode}</div>
-  </div>
-`;
+   const receiptHtml = createReceiptPrintHtml(item);
     printWindow.document.open();
     printWindow.document.write(`<!DOCTYPE html>
 <html lang="en">

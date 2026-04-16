@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 
 function LegacyFrame({ title, src }) {
   useEffect(() => {
-    const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
+    const API_BASE = import.meta.env.VITE_API_BASE || 'https://library-back-v33y.onrender.com';
 
     window.VEMU_SERVER_API_BASE = API_BASE;
     window.VEMU_SMS_API_BASE = API_BASE;

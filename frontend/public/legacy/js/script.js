@@ -377,7 +377,7 @@ function getFeedbackMonthKey(date = new Date()) {
 }
 
 function shouldShowMonthlyFeedback(date = new Date()) {
-    return Number(date.getDate()) === 10;
+    return Number(date.getDate()) === 17;
 }
 
 function hasSubmittedFeedbackForMonth(userUid, monthKey = getFeedbackMonthKey()) {
@@ -3546,4 +3546,19 @@ function forceAutosave() {
   autoSyncSafe();
   scheduleServerStateSync();
 }
+
+setTimeout(() => {
+    try {
+        mountMonthlyFeedbackPrompt();
+    } catch (e) {
+        console.warn("Feedback popup error", e);
+    }
+}, 1500);
+
+// AUTO LOAD HOME FEEDBACK
+setTimeout(() => {
+    try {
+        renderHomeFeedback();
+    } catch (e) {}
+}, 1000);
 

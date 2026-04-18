@@ -263,9 +263,9 @@
 
 
 
-        <button class="sidebar-toggle-mobile" id="sidebar-toggle-mobile" type="button" aria-label="Open menu">
+        <!-- <button class="sidebar-toggle-mobile" id="sidebar-toggle-mobile" type="button" aria-label="Open menu">
     <ion-icon name="menu-outline"></ion-icon>
-</button>
+</button> -->
         <div class="nav-left">
             <h2 id="user-display-name" style="font-weight: 700; color: var(--primary-slate); font-size: 1.15rem;">Scholar Kumar</h2>
             <p id="student-meta" style="color: var(--text-muted); font-size: 0.8rem;">B.Tech CSE - III Year (Roll: 23-CSE-001)</p>
@@ -420,7 +420,7 @@
                             <th>Book Details</th>
                             <th>ISBN / ID</th>
                             <th>Availability</th>
-                            <th>Action</th>
+                            <!-- <th>Action</th> -->
                         </tr>
                     </thead>
                     <tbody id="catalog-body"></tbody>
@@ -650,7 +650,30 @@
         
 
         function renderStudentSummary() {
-            const studentData = getStudentData();
+            const currentStudent = getCurrentManagedStudent();
+const fineAmount = Number(currentStudent.fineAmount || 0);
+const profile = currentStudent.profileDetails || {};
+
+document.getElementById('user-display-name').textContent = currentStudent.name || 'Student';
+document.getElementById('student-meta').textContent = `${currentStudent.dept || profile.department || 'B.Tech CSE'} - ${currentStudent.year || profile.designation || 'III Year'} (Roll: ${currentStudent.roll || profile.roll || 'N/A'})`;
+document.getElementById('fine-display').textContent = `Fine: ₹${fineAmount.toFixed(2)}`;
+
+const userHistory = getUserTransactionHistory(currentStudent.uid);
+
+const liveIssued = userHistory.filter(item => String(item.status || '').toUpperCase() === 'ISSUED');
+const liveReturned = userHistory.filter(item => String(item.status || '').toUpperCase() === 'RETURNED');
+
+document.getElementById('issued-count').textContent = String(liveIssued.length).padStart(2, '0');
+
+const nextDueItem = liveIssued
+    .slice()
+    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0];
+
+document.getElementById('next-due').textContent = nextDueItem
+    ? formatDate(nextDueItem.dueDate).replace(/ \d{4}$/, '')
+    : '--';
+
+document.getElementById('history-count').textContent = String(liveReturned.length).padStart(2, '0');
             const currentStudent = getCurrentManagedStudent();
             const fineAmount = Number(currentStudent.fineAmount || 0);
             const profile = currentStudent.profileDetails || {};
@@ -671,7 +694,7 @@ const nextDueItem = liveIssued
 
 document.getElementById('next-due').textContent = nextDueItem ? formatDate(nextDueItem.dueDate).replace(/ \d{4}$/, '') : '--';
             document.getElementById('history-count').textContent = String(studentData.historyCount).padStart(2, '0');
-            document.getElementById('saved-count').textContent = String(studentData.savedBooks).padStart(2, '0');
+            // document.getElementById('saved-count').textContent = String(studentData.savedBooks).padStart(2, '0');
             const liveNotifications = getNotificationsForUser(currentStudent, 10);
 document.getElementById('top-alert').textContent = liveNotifications[0]?.message || 'No new notifications.';
             // document.getElementById('next-due').textContent = studentData.issuedBooks.length ? studentData.issuedBooks[studentData.issuedBooks.length - 1].dueDate.replace(' 2026', '') : '--';
@@ -768,7 +791,7 @@ document.getElementById('top-alert').textContent = liveNotifications[0]?.message
             if (!results.length) {
                 body.innerHTML = `
                     <tr>
-                        <td colspan="4" style="text-align:center; color: var(--text-muted); padding: 18px; font-size: 0.8rem;">
+                        <td colspan="3" style="text-align:center; color: var(--text-muted); padding: 18px; font-size: 0.8rem;">
                             No books found for your search.
                         </td>
                     </tr>
@@ -777,24 +800,19 @@ document.getElementById('top-alert').textContent = liveNotifications[0]?.message
             }
 
             body.innerHTML = results.map(book => {
-                const badgeClass = book.available > 5 ? 'status-available' : 'status-low';
-                const badgeText = book.available > 5 ? `${book.available} Available` : `${book.available} Left`;
-                return `
-                    <tr>
-                        <td>
-                            <strong style="font-size:0.8rem;">${book.title}</strong><br>
-                            <span style="color: var(--text-muted); font-size:0.74rem;">${book.author} | Subject: ${book.category}</span>
-                        </td>
-                        <td style="font-size:0.75rem;">${book.isbn}<br><span style="color: var(--text-muted);">${book.id}</span></td>
-                        <td><span class="availability-badge ${badgeClass}">${badgeText}</span></td>
-                        <td>
-                            <button class="btn btn-primary" style="padding:7px 11px; font-size:0.7rem;" onclick="requestIssue('${book.id}')" title="Send issue request">
-                                Request Issue
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+    const badgeClass = book.available > 5 ? 'status-available' : 'status-low';
+    const badgeText = book.available > 5 ? `${book.available} Available` : `${book.available} Left`;
+    return `
+        <tr>
+            <td>
+                <strong style="font-size:0.8rem;">${book.title}</strong><br>
+                <span style="color: var(--text-muted); font-size:0.74rem;">${book.author} | Subject: ${book.category}</span>
+            </td>
+            <td style="font-size:0.75rem;">${book.isbn}<br><span style="color: var(--text-muted);">${book.id}</span></td>
+            <td><span class="availability-badge ${badgeClass}">${badgeText}</span></td>
+        </tr>
+    `;
+}).join('');
         }
 
         function resetBookResults() {
